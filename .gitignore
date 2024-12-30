@@ -1,2 +1,7 @@
 __pycache__/
 node_modules/
+.env
+.vscode/
+parsing_test.js
+test-vault/
+launch.json

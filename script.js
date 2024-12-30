@@ -1,26 +1,56 @@
 const apiUrl = "http://127.0.0.1:3000";
+const DEBUG = false;
+
+/**
+ * Prints a debug message if debugging is enabled.
+ *
+ * @param {string} message - The message to print.
+ */
+function printDebug(message) {
+  if (DEBUG) {
+    console.log(message);
+  }
+}
 
 // Get references to elements
 const fetchButton = document.getElementById("fetchButton");
-const pushButton = document.getElementById("pushButton");
 const responseElement = document.getElementById("response");
 const dataTable = document.getElementById("dataTable");
+const daysInput = document.getElementById("daysInput");
+const pushButton = document.getElementById("pushButton");
 
-// Add events listeners
-fetchButton.addEventListener("click", () => fetchData(-4, 0));
-pushButton.addEventListener("click", saveChanges);
-
-// Run fetchData on page load
+// Fetch the data when the page loads
 document.addEventListener("DOMContentLoaded", () => {
-  fetchData(-4, 0);
+  fetchData(-Number(daysInput.value), 0);
+});
+
+// Fetch data when the button is clicked
+fetchButton.addEventListener("click", () => {
+  fetchData(-Number(daysInput.value), 0);
+});
+
+// Push changes to the server when the button is clicked
+pushButton.addEventListener("click", () => {
+  responseElement.textContent = "Pushing changes to the server...";
+  saveChanges();
+});
+
+// Get the days value element from the input
+daysInput.addEventListener("input", () => {
+  daysValue.textContent = daysInput.value;
 });
 
 // Get the current content text
 let currentText = responseElement.textContent;
 
-// Create a data object to store the fetched data
-let fetchedDate = null;
+let fetchedData = {};
 
+/**
+ * Fetches data from the API and updates the UI.
+ *
+ * @param {number} startOffset - The starting offset in days from today.
+ * @param {number} endOffset - The ending offset in days from today.
+ */
 function fetchData(startOffset, endOffset) {
   const url = `${apiUrl}/api/yaml-data?startOffset=${startOffset}&endOffset=${endOffset}`;
 
@@ -32,11 +62,13 @@ function fetchData(startOffset, endOffset) {
       return response.json();
     })
     .then((data) => {
+      // Display the data in the response element
+      responseElement.textContent = "Data fetched successfully!";
+
       // Store the fetched data
       fetchedData = data;
 
-      // Display the data in the response element
-      responseElement.textContent = "Data fetched successfully";
+      printDebug(`First fetched data: ${JSON.stringify(fetchedData)}`);
 
       // Display in the table
       displayDataInTable(data);
@@ -47,6 +79,11 @@ function fetchData(startOffset, endOffset) {
     });
 }
 
+/**
+ * Displays data in the table.
+ *
+ * @param {Object} data - The data to display.
+ */
 function displayDataInTable(data) {
   // clear existing rows
   dataTable.innerHTML = "";
@@ -66,6 +103,11 @@ function displayDataInTable(data) {
   createTableRows(data, headers);
 }
 
+/**
+ * Creates and appends table headers.
+ *
+ * @param {string[]} headers - The headers to create.
+ */
 function createTableHeaders(headers) {
   // Create element for table header row
   const headerRow = document.createElement("tr");
@@ -73,6 +115,7 @@ function createTableHeaders(headers) {
   // Loop through each header and create a table header cell
   headers.forEach((header) => {
     const th = document.createElement("th"); // Create table header cell
+    th.setAttribute("data-value", header); // Set the data-value attribute, lowercase
     th.textContent = (function (header) {
       return header[0].toUpperCase() + header.slice(1); // Capitalize the header text
     })(header);
@@ -83,6 +126,12 @@ function createTableHeaders(headers) {
   dataTable.appendChild(headerRow);
 }
 
+/**
+ * Creates and appends table rows.
+ *
+ * @param {Object} data - The data to display.
+ * @param {string[]} headers - The headers to create.
+ */
 function createTableRows(data, headers) {
   // Populate the table rows
   // Loop through each date in the data
@@ -100,14 +149,9 @@ function createTableRows(data, headers) {
     headers.slice(1).forEach((header) => {
       // slice to avoid the 'Date'
       const td = document.createElement("td"); // Create a table cell
+      td.setAttribute("data-key", header); // Set the data-key attribute
       let value = data[date][header]; // Get the value from the data
-      td.setAttribute("data-key", header); // Set the data-key attribute to the header
-      td.setAttribute("data-value", value); // Set the data-value attribute to the value
-      if (typeof value === "number") {
-        renderNumberCell(td, value);
-      } else {
-        renderBooleanCell(td, value);
-      }
+      renderCellData(td, value); // Render the cell data
 
       row.appendChild(td); // Append the cell to the row
     });
@@ -118,17 +162,50 @@ function createTableRows(data, headers) {
 }
 
 let timer;
-
+/**
+ * Starts or resets the timer to 10 seconds.
+ * If the timer elapses, it prints a message to the console.
+ */
 function startOrResetTimer() {
-  clearTimeout(timer); // clear existing timer
+  // Clear any existing timer
+  clearTimeout(timer);
 
+  let seconds = 5;
+  let milliseconds = seconds * 1000;
+
+  // Start a new timer
   timer = setTimeout(() => {
-    console.log("10 seconds elapsed since last modification.");
-    responseElement.textContent = "Pushing...";
+    console.log(`${seconds} seconds have elapsed since the last modification.`);
+    responseElement.textContent = "Pushing changes to the server...";
+    // wait 1 second before saving changes
+    printDebug(`fetchedData (before saving): ${JSON.stringify(fetchedData)}`);
     saveChanges();
-  }, 5000);
+    printDebug(`fetchedData (after saving): ${JSON.stringify(fetchedData)}`);
+  }, milliseconds);
 }
 
+/**
+ * Renders cell data based on its type.
+ *
+ * @param {HTMLElement} td - The table cell element.
+ * @param {any} value - The value to render.
+ */
+function renderCellData(td, value) {
+  td.setAttribute("data-value", value);
+
+  if (typeof value === "number") {
+    renderNumberCell(td, value);
+  } else {
+    renderBooleanCell(td, value);
+  }
+}
+
+/**
+ * Renders a number cell with increment and decrement buttons.
+ *
+ * @param {HTMLElement} td - The table cell element.
+ * @param {number} value - The value to render.
+ */
 function renderNumberCell(td, value) {
   td.textContent = Number(value);
 
@@ -141,6 +218,14 @@ function renderNumberCell(td, value) {
   td.classList.add("number-cell");
 }
 
+/**
+ * Creates a button for incrementing or decrementing a value.
+ *
+ * @param {HTMLElement} td - The table cell element.
+ * @param {number} value - The value to increment or decrement.
+ * @param {string} type - The type of button ("increment" or "decrement").
+ * @returns {HTMLElement} The created button element.
+ */
 function createButton(td, value, type) {
   const button = document.createElement("span");
   button.textContent = type === "increment" ? "+" : "-";
@@ -167,11 +252,18 @@ function createButton(td, value, type) {
     td.appendChild(createButton(td, value, "decrement"));
     td.appendChild(createButton(td, value, "increment"));
     startOrResetTimer();
+    printDebug(`Fetched data as a string: ${JSON.stringify(fetchedData)}`);
   });
 
   return button;
 }
 
+/**
+ * Renders a boolean cell with toggle functionality.
+ *
+ * @param {HTMLElement} td - The table cell element.
+ * @param {boolean} value - The value to render.
+ */
 function renderBooleanCell(td, value) {
   td.textContent = value ? "Yes" : "No";
 
@@ -193,10 +285,12 @@ function renderBooleanCell(td, value) {
     td.textContent = value ? "Yes" : "No";
     td.setAttribute("data-value", value);
     startOrResetTimer();
+    printDebug(`Fetched data as a string: ${JSON.stringify(fetchedData)}`);
   });
 }
 
 function saveChanges() {
+  printDebug(`Fetching data to save:\nfetchedData`);
   // Get all modified dates and their data
   const modifiedData = Object.keys(fetchedData)
     .filter((date) => fetchedData[date].modified)
@@ -204,10 +298,13 @@ function saveChanges() {
       acc[date] = fetchedData[date];
       return acc;
     }, {});
+  printDebug(`Filtered non-modified:\n${JSON.stringify(fetchedData)}`);
 
+  // Remove the 'modified' key from each entry
   Object.keys(modifiedData).forEach((date) => {
     delete modifiedData[date].modified;
   });
+  printDebug(`Removed modified field:\n${JSON.stringify(fetchedData)}`);
 
   if (Object.keys(modifiedData).length === 0) {
     responseElement.textContent = "No changes to save";
@@ -239,7 +336,7 @@ function saveChanges() {
       responseElement.textContent = "All changes saved successfully";
       console.log("Save result:", result);
 
-      fetchData(-4, 0);
+      fetchData(-Number(daysInput.value), 0);
     })
     .catch((error) => {
       responseElement.textContent = `Error saving changes: ${error.message}`;

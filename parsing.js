@@ -1,7 +1,16 @@
+// parsing.js
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { format } from "date-fns";
 import yaml from "js-yaml";
-const vaultPath = "/Users/gaspardderoyan/SyncThing/Gas24/Daily Notes";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const vaultPath = process.env.VAULT_PATH;
+
+export function dateToPath(date) {
+  return `${vaultPath}/${date}.md`;
+}
 
 /**
  * Generates an array of date strings within a given range from today.
@@ -10,7 +19,7 @@ const vaultPath = "/Users/gaspardderoyan/SyncThing/Gas24/Daily Notes";
  * @param {number} endOffset - Ending offset in days from today
  * @returns {string[]} Array of dates in 'yyyy-MM-dd' format
  */
-function getDateRange(startOffset, endOffset) {
+export function getDateRange(startOffset, endOffset) {
   const dates = [];
   for (let offset = startOffset; offset <= endOffset; offset++) {
     const dateStr = format(
@@ -23,13 +32,14 @@ function getDateRange(startOffset, endOffset) {
 }
 
 /**
- * Parses a markdown file to extract YAML front matter.
+ * Parses a markdown file to extract YAML front matter or the content after it.
  *
  * @param {string} filePath - The path to the markdown file.
- * @returns {string|undefined} The extracted YAML front matter without leading or trailing newlines, or undefined if an error occurs.
- * @throws {Error} If the file does not exist or YAML front matter is not found.
+ * @param {string} target - The target to extract: "yaml" for YAML front matter, "content" for everything after YAML.
+ * @returns {string|undefined} The extracted YAML front matter or content, or undefined if an error occurs.
+ * @throws {Error} If the file does not exist, YAML front matter is not found, or the target is invalid.
  */
-function parseMarkdown(filePath) {
+export function parseMarkdown(filePath, target) {
   try {
     // Check if file exists
     if (!existsSync(filePath)) {
@@ -39,18 +49,29 @@ function parseMarkdown(filePath) {
     // Read file's content
     const content = readFileSync(filePath, "utf-8");
 
-    // Split the content to extract YAML front matter
-    const yamlFront = content.split("---", 2);
+    // Find positions of the first and second '---'
+    const firstIndex = content.indexOf("---");
+    const secondIndex = content.indexOf("---", firstIndex + 3);
 
-    // Check if YAML front matter is present
-    if (yamlFront.length < 2) {
+    // Ensure there are two '---' separators
+    if (firstIndex === -1 || secondIndex === -1) {
       throw new Error("YAML front matter not found");
     }
 
-    // Return the YAML without \n on top/bottom
-    return yamlFront[1].trim();
+    // Extract YAML front matter and content
+    const yaml = content.substring(firstIndex + 3, secondIndex).trim();
+    const contentAfterYaml = content.substring(secondIndex + 3);
+
+    // Return based on target
+    if (target === "yaml") {
+      return yaml;
+    } else if (target === "content") {
+      return contentAfterYaml.trim();
+    } else {
+      throw new Error(`Invalid target specified: ${target}`);
+    }
   } catch (error) {
-    // console.error(`Error parsing markdown file: ${error.message}`)
+    console.error(`Error parsing markdown file: ${error.message}`);
   }
 }
 
@@ -68,7 +89,7 @@ function parseMarkdown(filePath) {
  * const data = parseYAML(yamlString);
  * console.log(data); // { key1: 'value1', key2: 'value2' }
  */
-function parseYAML(yamlString) {
+export function parseYAML(yamlString) {
   if (yamlString === null || yamlString === undefined) {
     throw new Error("Input YAML string cannot be null or undefined");
   }
@@ -113,16 +134,17 @@ function parseYAML(yamlString) {
  * //   '2023-10-02': { key1: 'value3', key2: 'value4' }
  * // }
  */
-function getYAMLDataAsObjectFromDates(datesArray) {
+export function getYAMLDataAsObjectFromDates(datesArray) {
   const dataObj = {};
 
   datesArray.forEach((dateStr) => {
-    const filePath = `${vaultPath}/${dateStr}.md`;
-    const yamlStr = parseMarkdown(filePath);
+    const filePath = dateToPath(dateStr);
+    const yamlStr = parseMarkdown(filePath, "yaml");
     if (yamlStr) {
       const yamlObj = parseYAML(yamlStr);
       dataObj[dateStr] = yamlObj;
-      dataObj[dateStr].modified = false;
+    } else {
+      dataObj[dateStr] = {}; // Ensure an empty object is returned if no YAML is found
     }
   });
 
@@ -135,24 +157,13 @@ function getYAMLDataAsObjectFromDates(datesArray) {
  * @param {string} filePath - The path to the markdown file.
  * @param {Object} newData - The new data to replace the YAML front matter.
  */
-function updateYAMLFrontmatter(filePath, newData) {
+export function updateYAMLFrontmatter(filePath, newData) {
   try {
-    // Read the file content
-    const content = readFileSync(filePath, "utf-8");
-
-    // Split the content to extract the body
-    const parts = content.split("---");
-    if (parts.length < 3) {
-      throw new Error("Invalid markdown file format");
-    }
-
-    // Create new YAML front matter
-    const newFrontmatter = yaml.dump(newData);
+    const content = parseMarkdown(filePath, "content");
 
     // Reconstruct the file content with new front matter
-    const newContent = `---\n${newFrontmatter}---\n${parts
-      .slice(2)
-      .join("---")}`;
+    const newFrontmatter = yaml.dump(newData);
+    const newContent = `---\n${newFrontmatter}---\n${content}`;
 
     // Write the updated content back to the file
     writeFileSync(filePath, newContent, "utf-8");
@@ -161,12 +172,14 @@ function updateYAMLFrontmatter(filePath, newData) {
   }
 }
 
-function updateAllYAMLFiles(data) {
+/**
+ * Updates the YAML front matter of all markdown files with new data.
+ *
+ * @param {Object} data - The data to update.
+ */
+export function updateAllYAMLFiles(data) {
   Object.keys(data).forEach((date) => {
-    const filePath = `${vaultPath}/${date}.md`;
+    const filePath = dateToPath(date);
     updateYAMLFrontmatter(filePath, data[date]);
   });
 }
-
-// Export the functions for testing
-export { getDateRange, getYAMLDataAsObjectFromDates, updateAllYAMLFiles };
