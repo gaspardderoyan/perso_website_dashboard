@@ -1,0 +1,100 @@
+/* General body styling */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 20px;
+  background-color: #f4f4f9;
+  color: #333;
+}
+
+/* Center and limit the width of the main container */
+.container {
+  max-width: 500px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Style the title */
+h1 {
+  font-size: 24px;
+}
+/* Style the button */
+button {
+  padding: 10px 20px; /* Add padding inside the button */
+  background-color: #007bff; /* Blue background */
+  color: white; /* White text */
+  border: none; /* Remove default border */
+  border-radius: 4px; /* Rounded corners */
+  cursor: pointer; /* Indicate that it's clickable */
+}
+
+/* Change the button color on hover */
+button:hover {
+  background-color: #0056b3; /* Darker blue */
+}
+
+/* Style the response display area */
+#response {
+  margin-top: 20px; /* Add spacing above */
+  padding: 10px; /* Add padding inside */
+  border: 1px solid #ddd; /* Light gray border */
+  background: #fff; /* White background */
+  border-radius: 4px; /* Rounded corners */
+  text-align: left; /* Align text to the left for readability */
+}
+
+/* Style the table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  table-layout: fixed; /* Ensure the table takes up the full width */
+}
+
+/* Style the table headers */
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  word-wrap: break-word; /* Ensure long words break to fit the cell */
+}
+
+/* Style the table rows */
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* Style the table headers */
+th {
+  background-color: #007bff;
+  color: white;
+  text-align: center;
+}
+
+/* Style for number cell */
+.number-cell {
+  position: relative;
+}
+
+/* Style for increment and decrement buttons */
+.increment-button, .decrement-button {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  font-weight: bold;
+  user-select: none;
+  font-size: 1.2em; /* Increase font size */
+}
+
+.increment-button {
+  right: 10px; /* Move slightly towards the center */
+}
+
+.decrement-button {
+  left: 10px; /* Move slightly towards the center */
+}
+
+/* Show buttons only on hover of the specific cell */
+.number-cell:hover .increment-button,
+.number-cell:hover .decrement-button {
+  opacity: 1;
+}
