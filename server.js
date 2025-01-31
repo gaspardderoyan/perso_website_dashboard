@@ -4,11 +4,11 @@ import cors from "cors"; // Import the cors middleware
 import {
   getDateRange,
   getYAMLDataAsObjectFromDates,
-  updateAllYAMLFiles,
-} from "./parsing.js";
+  updateAllYAMLFiles
+} from "./parsing_new.js";
 
 const app = express();
-const port = 3000; // Define the port where the server will run
+const port = 3100; // Define the port where the server will run
 
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware to parse JSON bodies
@@ -66,7 +66,7 @@ app.get("/api/yaml-data", (req, res) => {
 app.post("/api/update-data", (req, res) => {
   const updates = req.body; // Expecting a single JSON object
 
-  console.log("Received updates:\n", updates);
+  //console.log("Received updates:\n", updates);
 
   // Validate that updates is an object and not an array
   if (typeof updates !== "object" || Array.isArray(updates)) {
@@ -75,10 +75,23 @@ app.post("/api/update-data", (req, res) => {
       .json({ error: "Expected a single object with updates" });
   }
 
+  const filteredDates = {};
+  for (const date in updates) {
+    if (globalData[date]) {
+      const globalStr = JSON.stringify(globalData[date]);
+      const updateStr = JSON.stringify(updates[date]);
+      if (globalStr !== updateStr) {
+        filteredDates[date] = updates[date];
+      }
+    }
+  }
+
+  console.log("Filtered updates:\n", filteredDates);
+
   try {
-    updateAllYAMLFiles(updates);
-    Object.keys(updates).forEach((date) => {
-      globalData[date] = { ...globalData[date], ...updates[date] };
+    updateAllYAMLFiles(filteredDates);
+    Object.keys(filteredDates).forEach((date) => {
+      globalData[date] = { ...globalData[date], ...filteredDates[date] };
     });
     res.status(200).json({ message: "Data updated successfully" }); // Send success response
   } catch (error) {
