@@ -9,6 +9,7 @@ import {
 
 const app = express();
 const port = 3100; // Define the port where the server will run
+const host = '0.0.0.0'; // This allows connections from any IP
 
 app.use(cors()); // Enable CORS for all routes
 app.use(express.json()); // Middleware to parse JSON bodies
@@ -102,5 +103,5 @@ app.post("/api/update-data", (req, res) => {
 
 // Start the server and listen on the specified port
 app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+  console.log(`Server is running on https://djivan.me:${port}`);
 });
