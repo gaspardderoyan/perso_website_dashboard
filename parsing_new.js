@@ -3,11 +3,20 @@ import { format } from "date-fns";
 import dotenv from "dotenv";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import yaml from "js-yaml";
+import os from "os";
 
 // Load the .env file
 dotenv.config();
 
-const defaultVaultPath = process.env.VAULT_PATH;
+let defaultVaultPath;
+
+if (os.platform() === 'darwin') {
+  defaultVaultPath = process.env.MAC_VAULT_PATH;
+} else {
+  defaultVaultPath = process.env.RPI_VAULT_PATH;
+}
+
+console.log("defaultVaultPath: ", defaultVaultPath);
 
 /**
  * Given a date string, and optionnaly a vaultPath (defaults from .env),

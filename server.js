@@ -16,29 +16,25 @@ app.use(express.json()); // Middleware to parse JSON bodies
 
 let globalData = {};
 
-// Define the API endpoint for fetching YAML data
 app.get("/api/yaml-data", (req, res) => {
-  // Extract startOffset and endOffset from query parameters
-  const { startOffset, endOffset } = req.query;
+  // Extract startOffset and endOffset from query parameters, using default values if not provided
+  const startOffset = req.query.startOffset;
+  const endOffset = req.query.endOffset;
 
-  // Validate that the query parameters are provided
-  if (!startOffset || !endOffset) {
-    // Respond with HTTP 400 if parameters are missing
+  // Define default values
+  const defaultStartOffset = -5;
+  const defaultEndOffset = 0;
+
+  // Parse the query parameters to integers, using default values if parameters are not provided
+  const start = startOffset === undefined ? defaultStartOffset : parseInt(startOffset, 10); // Convert startOffset to an integer or use default
+  const end = endOffset === undefined ? defaultEndOffset : parseInt(endOffset, 10); // Convert endOffset to an integer or use default
+
+  // Check if the parsed values are valid numbers (only if they are provided in the query, otherwise defaults are valid numbers)
+  if ((startOffset !== undefined && isNaN(start)) || (endOffset !== undefined && isNaN(end))) {
+    // Respond with HTTP 400 if provided parameters are not valid numbers
     return res
       .status(400)
-      .json({ error: "startOffset and endOffset are required" });
-  }
-
-  // Parse the query parameters to integers
-  const start = parseInt(startOffset, 10); // Convert startOffset to an integer
-  const end = parseInt(endOffset, 10); // Convert endOffset to an integer
-
-  // Check if the parsed values are valid numbers
-  if (isNaN(start) || isNaN(end)) {
-    // Respond with HTTP 400 if parameters are not valid numbers
-    return res
-      .status(400)
-      .json({ error: "startOffset and endOffset must be valid numbers" });
+      .json({ error: "startOffset and endOffset must be valid numbers if provided" });
   }
 
   // Try to process the request
@@ -57,6 +53,7 @@ app.get("/api/yaml-data", (req, res) => {
     res.status(500).json({ error: "Internal server error" }); // Respond with HTTP 500 if an error occurs
   }
 });
+
 
 /**
  * Endpoint to update the global data
@@ -102,6 +99,8 @@ app.post("/api/update-data", (req, res) => {
 });
 
 // Start the server and listen on the specified port
-app.listen(port, () => {
-  console.log(`Server is running on https://djivan.me:${port}`);
+app.listen(port, host, () => {
+  console.log(`Server is running on http://djivan.me:${port}`);
 });
+
+
