@@ -1,0 +1,136 @@
+body {
+  font-family: 'GeistSans', sans-serif;
+}
+
+table {
+  margin: 0 auto;
+  border-collapse: collapse;
+  width: 70%;
+}
+
+/* Style the table headers */
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 15px;
+}
+
+th {
+  background-color: rgb(247, 247, 247);
+  font-weight: normal;
+  color: grey;
+}
+
+/* Center and limit the width of the main container */
+.container {
+  max-width: 165em;
+  margin: 0 auto;
+  text-align: center;
+}
+
+/* Style for number cell */
+.number-cell {
+  position: relative;
+}
+
+/* Change the button color on hover */
+button:hover {
+  background-color: #0056b3;
+  /* Darker blue */
+}
+
+/* Style for increment and decrement buttons */
+.increment-button,
+.decrement-button {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  font-weight: bold;
+  user-select: none;
+  font-size: 1.2em;
+  /* Increase font size */
+}
+
+.increment-button {
+  right: 10px;
+  /* Move slightly towards the center */
+}
+
+.decrement-button {
+  left: 10px;
+  /* Move slightly towards the center */
+}
+
+/* Show buttons only on hover of the specific cell */
+.number-cell:hover .increment-button,
+.number-cell:hover .decrement-button {
+  opacity: 1;
+}
+
+/* Style for habit name cell */
+.habit-cell {
+  text-align: left;
+  text-transform: capitalize;
+}
+
+/* Make the checked booleans green background */
+.checked-cell {
+  background-color: rgba(144, 238, 144, 0.725);
+}
+
+th.today {
+  border-top: 2px solid black;
+}
+
+td.today,
+th.today {
+  border-left: 2px solid black;
+  border-right: 2px solid black;
+}
+
+table tr:last-child th.today,
+table tr:last-child td.today {
+  border-bottom: 2px solid black;
+}
+
+.date-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.date-header .month {
+  font-size: 0.8em;
+}
+
+.date-header .day {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: black;
+}
+
+.date-header .weekday {
+  text-transform: uppercase;
+  font-size: 0.9em;
+}
+
+th.today .date-header {
+  background-color: #90EE90;
+  border-radius: 50%;
+  padding: 10px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  justify-content: center;
+  margin: 0 auto;
+  color: black;
+}
+
+.boolean {
+  font-family: "Inter", serif !important;
+}
+
+.hidden {
+  display: none;
+}
