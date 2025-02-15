@@ -27,6 +27,7 @@ export function resetPushTimer() {
 document.querySelector("#app").innerHTML = /*html*/ `
   <div class ="container">
     <h1>Simple API Dashboard</h1>
+    <p id="subtitle">Dashboard to track my habits</p>  
     <input type="password" id="passwordInput" placeholder="Enter password">
     <table id="dataTable"></table>
   </div>
@@ -50,11 +51,17 @@ setupPasswordInput(passwordInput, async (password) => {
     console.log("Password accepted!");
     currentPassword = ""; // delete password
     passwordInput.classList.add("hidden"); // hide password field
+
+    // Add a timeout to set display: none after the transition completes
+    setTimeout(() => {
+      passwordInput.style.display = "none";
+    }, 500); // 500ms matches the transition duration in CSS
     // fetch data, store it in global var
     fetchedData = await fetchData(-6, apiKey);
     console.log(fetchedData);
     // TODO: only if data not empty, display table
     displayDataInTable(dataTable, fetchedData, habitsOrder);
+    dataTable.classList.add("visible"); // show table
   }
 });
 
