@@ -1,7 +1,7 @@
 // config.js
 
 export const config = {
-  apiUrl: "http://djivan.me:3100",
+  apiUrl: "https://djivan.me",
   habitsOrder: ["vitamins", "pimsleur", "huel", "teeth"],
   habitsEmojis: {
     vitamins: "💊",
