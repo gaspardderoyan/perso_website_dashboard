@@ -31,6 +31,7 @@ document.querySelector("#app").innerHTML = /*html*/ `
     <input type="password" id="passwordInput" placeholder="Enter password">
     <table id="dataTable"></table>
   </div>
+  <div class="alert">Some text!</div>
 `;
 
 // passwd input element

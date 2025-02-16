@@ -57,8 +57,33 @@ body {
 
 table {
   margin: 5em auto;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   width: 70%;
+}
+
+/* Top-left corner */
+table tr:first-child th:first-child,
+table tr:first-child td:first-child {
+  border-top-left-radius: 10px;
+}
+
+/* Top-right corner */
+table tr:first-child th:last-child,
+table tr:first-child td:last-child {
+  border-top-right-radius: 10px;
+}
+
+/* Bottom-left corner */
+table tr:last-child th:first-child,
+table tr:last-child td:first-child {
+  border-bottom-left-radius: 10px;
+}
+
+/* Bottom-right corner */
+table tr:last-child th:last-child,
+table tr:last-child td:last-child {
+  border-bottom-right-radius: 10px;
 }
 
 /* Style the table headers */
@@ -203,4 +228,17 @@ td.boolean svg {
   opacity: 1;
   margin-top: 5em;
   /* Return to original margin */
+
+}
+
+.alert {
+  display: none;
+  position: absolute;
+  top: 2em;
+  right: 2em;
+  border: 2px solid hsl(267, 84%, 81%);
+  color: hsl(232, 97%, 85%);
+  padding: 0.7em;
+  border-radius: 0.3em;
+  font-size: 1.1em;
 }
