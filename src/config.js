@@ -2,10 +2,11 @@
 
 export const config = {
   apiUrl: "https://djivan.me",
-  habitsOrder: ["vitamins", "pimsleur", "huel", "teeth"],
+  habitsOrder: ["vitamins", "pimsleur", "school", "huel", "teeth"],
   habitsEmojis: {
     vitamins: "💊",
     pimsleur: "🇮🇹",
+    school: "🏫", 
     huel: "🥤",
     teeth: "🦷",
   },
