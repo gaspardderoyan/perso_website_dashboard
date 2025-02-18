@@ -6,9 +6,13 @@ import { printDebug } from "./utils.js";
 // TODO: write comment
 export async function getKey(passwordInput) {
   let password = passwordInput.value.trim();
-  const url = `${apiUrl}/generate_api_key?password=${password}`;
+  const url = `${apiUrl}/generate_api_key`;
   const response = await fetch(url, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ password : password })
   });
 
   if (!response.ok) {
